@@ -34,25 +34,6 @@
 
 ---
 
-## 部署教程
-
-### Gitee Pages 部署（推荐）
-
-1. Fork 本仓库到自己账号
-2. 进入仓库页面 → **服务** → **Gitee Pages**
-3. 选择分支 `master`，根目录为 `/`
-4. 点击**启动**，稍等片刻即可通过链接访问
-
-### 本地运行
-
-1. 克隆仓库到本地
-   ```bash
-   git clone https://gitee.com/botany-zhang/zhkucampus-plants.git
-   ```
-2. 直接用浏览器打开 `index.html` 即可（无需安装任何依赖）
-
----
-
 ## 图片更新说明
 
 在 `images/` 目录中按以下规则存放图片即可自动关联：
