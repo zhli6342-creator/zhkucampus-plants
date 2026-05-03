@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>药用植物学 · 校园实习小助手</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g0:#0d2818;--g1:#1a3d28;--g2:#2d6a4f;--g3:#52b788;--g4:#95d5b2;--g5:#d8f3dc;--g6:#f0faf2;
+  --amber:#e9a825;--red:#c0392b;--cream:#fefcf8;--ink:#1c1c1c;--muted:#6b7c6e;--border:#c8e6c9;
+  --card-r:14px;--nav-h:60px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+button{border:none;background:none;cursor:pointer;font-family:inherit}
+
+/* ── NAV ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--g0);padding:12px 16px 10px;display:flex;align-items:center;gap:10px}
+.topbar-logo{width:30px;height:30px;background:var(--g3);border-radius:60% 10% 60% 10%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.topbar-title{color:#fff;font-family:'Noto Serif SC',serif;font-size:15px;letter-spacing:1px;line-height:1.3}
+.topbar-title span{display:block;font-size:11px;color:var(--g4);font-family:'Noto Sans SC',sans-serif;letter-spacing:0}
+.topbar-fav-btn{margin-left:auto;color:var(--g4);font-size:22px;padding:2px 4px}
+
+.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:#fff;border-top:1px solid var(--border);display:flex;height:var(--nav-h)}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-size:11px;transition:color .2s}
+.bnav-item.active{color:var(--g2)}
+.bnav-icon{font-size:22px;line-height:1}
+
+/* ── PAGES ── */
+.page{display:none;position:fixed;top:56px;bottom:var(--nav-h);left:0;right:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.page.active{display:block}
+
+/* ── HOME / BROWSE ── */
+.home-hero{background:linear-gradient(160deg,var(--g0),var(--g2));padding:20px 16px 24px;position:relative;overflow:hidden}
+.home-hero::after{content:'🌿';position:absolute;right:-15px;top:-10px;font-size:110px;opacity:.08;transform:rotate(15deg)}
+.hero-count{color:var(--g4);font-size:12px;margin-bottom:6px}
+.hero-h{color:#fff;font-family:'Noto Serif SC',serif;font-size:22px;margin-bottom:4px}
+.hero-sub{color:var(--g4);font-size:13px}
+
+/* search */
+.search-wrap{padding:12px 16px 0;position:sticky;top:0;background:var(--cream);z-index:10}
+.search-box{display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:0 12px;gap:8px}
+.search-box input{flex:1;border:none;outline:none;font-size:15px;font-family:'Noto Sans SC',sans-serif;padding:11px 0;background:none;color:var(--ink)}
+.search-box input::placeholder{color:#aaa}
+.search-clear{color:#ccc;font-size:18px;padding:4px;display:none}
+
+/* filters */
+.filter-section{padding:10px 16px 4px}
+.filter-label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;transition:all .18s}
+.chip.on{background:var(--g2);border-color:var(--g2);color:#fff}
+
+/* life form icons */
+.lf-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:8px 16px 4px}
+.lf-chips::-webkit-scrollbar{display:none}
+.lf-chip{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;padding:6px 10px;border-radius:10px;border:1px solid var(--border);background:#fff;font-size:10px;color:var(--muted);transition:all .18s;min-width:52px}
+.lf-chip .lf-icon{font-size:20px}
+.lf-chip.on{background:var(--g2);border-color:var(--g2);color:#fff}
+
+/* results */
+.results-header{padding:10px 16px 4px;display:flex;align-items:center;justify-content:space-between}
+.results-count{font-size:12px;color:var(--muted)}
+.sort-btn{font-size:12px;color:var(--g2)}
+
+/* plant grid */
+.plant-grid{padding:0 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.plant-card{background:#fff;border-radius:var(--card-r);overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.07);border:1px solid var(--border);cursor:pointer;transition:transform .15s}
+.plant-card:active{transform:scale(.97)}
+.card-img{height:100px;background:var(--g6);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+.card-img img{width:100%;height:100%;object-fit:cover}
+.card-img .no-img{font-size:40px;opacity:.4}
+.toxic-badge{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;font-weight:500}
+.card-body{padding:8px 10px 10px}
+.card-name{font-size:14px;font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-latin{font-size:10px;color:var(--muted);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.card-tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-size:10px;padding:2px 7px;border-radius:8px;background:var(--g6);color:var(--g2)}
+.tag.toxic{background:#fde8e8;color:var(--red)}
+.tag.lf{background:#e8f4fd;color:#1565c0}
+.fav-dot{position:absolute;top:6px;left:6px;font-size:16px}
+
+/* ── DETAIL PAGE ── */
+#page-detail{background:var(--cream)}
+.detail-back{position:sticky;top:0;background:var(--g0);padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:50}
+.detail-back button{color:#fff;font-size:22px}
+.detail-back .detail-title{color:#fff;font-size:15px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail-back .fav-toggle{font-size:24px;margin-left:auto}
+
+.detail-imgs{background:#000;position:relative;height:240px;overflow:hidden}
+.detail-imgs img{width:100%;height:100%;object-fit:cover;opacity:.92}
+.detail-imgs .no-img-big{display:flex;align-items:center;justify-content:center;height:100%;font-size:80px;background:var(--g6)}
+.img-counter{position:absolute;bottom:10px;right:12px;background:rgba(0,0,0,.5);color:#fff;font-size:11px;padding:2px 8px;border-radius:10px}
+
+.detail-body{padding:16px}
+.detail-name{font-family:'Noto Serif SC',serif;font-size:24px;font-weight:600;margin-bottom:2px}
+.detail-latin{font-style:italic;color:var(--muted);font-size:13px;margin-bottom:12px}
+
+.info-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.info-chip{padding:4px 12px;border-radius:20px;font-size:12px;background:var(--g6);color:var(--g2);border:1px solid var(--border)}
+.info-chip.toxic-chip{background:#fde8e8;color:var(--red);border-color:#f5c6c6}
+
+.detail-section{margin-bottom:16px}
+.section-title{font-size:13px;font-weight:500;color:var(--g2);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';display:inline-block;width:3px;height:14px;background:var(--g3);border-radius:2px}
+.section-body{font-size:14px;line-height:1.8;color:#333}
+
+.disclaimer{background:#fffbf0;border:1px solid #f5d98b;border-radius:10px;padding:10px 12px;font-size:11px;color:#7a6010;line-height:1.6;margin-top:8px}
+.disclaimer::before{content:'⚠ 免责声明：'}
+
+.note-box{background:var(--g6);border-left:3px solid var(--g3);padding:8px 12px;border-radius:0 8px 8px 0;font-size:12px;color:var(--muted);line-height:1.6;margin-top:8px}
+
+.share-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:12px;background:var(--g2);color:#fff;border-radius:10px;font-size:14px;margin-top:8px}
+
+/* ── FAVORITES ── */
+#page-fav .fav-empty{text-align:center;padding:60px 20px;color:var(--muted)}
+#page-fav .fav-empty .big-icon{font-size:60px;margin-bottom:12px}
+.fav-list{padding:12px 16px}
+
+/* ── MAP ── */
+#page-map .map-coming{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;padding:40px;text-align:center;color:var(--muted)}
+#page-map .map-coming .big-icon{font-size:70px}
+#page-map .map-coming h3{font-size:18px;color:var(--g2)}
+#page-map .map-coming p{font-size:13px;line-height:1.7}
+
+/* ── MED CATEGORY TABS ── */
+.med-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:10}
+.med-tabs::-webkit-scrollbar{display:none}
+.med-tab{padding:10px 14px;font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;border-bottom:2px solid transparent;transition:all .2s}
+.med-tab.on{color:var(--g2);border-bottom-color:var(--g2)}
+
+/* ── FULL-SCREEN SEARCH ── */
+#page-search .search-wrap{padding:12px 16px}
+#page-search .search-result-list{padding:0 16px 16px}
+.search-result-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.sri-thumb{width:52px;height:52px;border-radius:8px;overflow:hidden;background:var(--g6);flex-shrink:0}
+.sri-thumb img{width:100%;height:100%;object-fit:cover}
+.sri-info{flex:1;min-width:0}
+.sri-name{font-size:15px;font-weight:500;margin-bottom:2px}
+.sri-sub{font-size:12px;color:var(--muted)}
+.sri-tags{display:flex;gap:4px;margin-top:4px}
+
+/* highlight */
+mark{background:#d8f3dc;color:var(--g0);border-radius:2px;padding:0 1px}
+
+/* empty state */
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted);font-size:14px}
+
+/* global footer */
+.global-footer{padding:16px;font-size:11px;color:var(--muted);line-height:1.7;border-top:1px solid var(--border);margin-top:8px}
+
+/* img swipe */
+.imgs-track{display:flex;transition:transform .3s ease;height:100%}
+.imgs-track img{min-width:100%;height:100%;object-fit:cover}
+.img-nav{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px}
+.img-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5)}
+.img-dot.active{background:#fff}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">🌿</div>
+  <div class="topbar-title">药用植物学<span>校园实习小助手</span></div>
+  <button class="topbar-fav-btn" onclick="goFav()" title="收藏">🔖</button>
+</div>
+
+<!-- PAGES -->
+
+<!-- ① 主页/浏览 -->
+<div id="page-home" class="page active">
+  <div class="home-hero">
+    <div class="hero-count" id="hero-count">共 117 种植物</div>
+    <div class="hero-h">校园植物图鉴</div>
+    <div class="hero-sub">点击搜索，或按科属、功效浏览</div>
+  </div>
+
+  <div class="search-wrap">
+    <div class="search-box">
+      <span style="font-size:18px;color:#aaa">🔍</span>
+      <input id="main-search" type="search" placeholder="搜索物种名、科属、特征关键词…" oninput="onSearch(this.value)">
+      <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+    </div>
+  </div>
+
+  <!-- 生活型 -->
+  <div class="lf-chips" id="lf-chips">
+    <div class="lf-chip on" data-lf="all" onclick="toggleLF(this)"><span class="lf-icon">🌏</span>全部</div>
+    <div class="lf-chip" data-lf="乔木" onclick="toggleLF(this)"><span class="lf-icon">🌳</span>乔木</div>
+    <div class="lf-chip" data-lf="灌木" onclick="toggleLF(this)"><span class="lf-icon">🌿</span>灌木</div>
+    <div class="lf-chip" data-lf="草本" onclick="toggleLF(this)"><span class="lf-icon">🌱</span>草本</div>
+    <div class="lf-chip" data-lf="藤本" onclick="toggleLF(this)"><span class="lf-icon">🍃</span>藤本</div>
+    <div class="lf-chip" data-lf="蕨类" onclick="toggleLF(this)"><span class="lf-icon">🌾</span>蕨类</div>
+    <div class="lf-chip" data-lf="棕榈" onclick="toggleLF(this)"><span class="lf-icon">🌴</span>棕榈</div>
+    <div class="lf-chip" data-lf="裸子植物" onclick="toggleLF(this)"><span class="lf-icon">🎋</span>裸子</div>
+  </div>
+
+  <!-- 科属筛选 -->
+  <div class="filter-section">
+    <div class="filter-label">按科筛选</div>
+    <div class="chips" id="family-chips"></div>
+  </div>
+
+  <!-- 功效分类 -->
+  <div class="filter-section" style="margin-top:4px">
+    <div class="filter-label">按功效筛选</div>
+    <div class="chips" id="med-chips">
+      <div class="chip on" data-med="all" onclick="toggleMed(this)">全部</div>
+      <div class="chip" data-med="清热解毒" onclick="toggleMed(this)">🌡 清热解毒</div>
+      <div class="chip" data-med="活血化瘀" onclick="toggleMed(this)">❤️ 活血化瘀</div>
+      <div class="chip" data-med="祛风除湿" onclick="toggleMed(this)">💨 祛风除湿</div>
+      <div class="chip" data-med="止血收敛" onclick="toggleMed(this)">🩸 止血收敛</div>
+      <div class="chip" data-med="利湿通淋" onclick="toggleMed(this)">💧 利湿通淋</div>
+      <div class="chip" data-med="补益" onclick="toggleMed(this)">✨ 补益</div>
+      <div class="chip" data-med="杀虫消积" onclick="toggleMed(this)">🔬 杀虫消积</div>
+      <div class="chip" data-med="观赏/其他" onclick="toggleMed(this)">🌸 观赏/其他</div>
+    </div>
+  </div>
+
+  <div class="results-header">
+    <span class="results-count" id="results-count"></span>
+    <span style="font-size:11px;color:var(--muted)">⚠️ 红框 = 含有毒成分</span>
+  </div>
+
+  <div class="plant-grid" id="plant-grid"></div>
+  <div class="global-footer">
+    本应用仅供<strong>药用植物学实习教学</strong>使用，物种信息及中药药用记载均为学术参考，不构成任何医疗诊断、治疗或饮食建议。如有健康问题，请咨询专业医疗人员。
+  </div>
+</div>
+
+<!-- ② 联系作者页 -->
+<div id="page-contact" class="page">
+  <div style="padding:20px 16px 8px;font-family:'Noto Serif SC',serif;font-size:18px;color:var(--g2)">联系作者</div>
+  <div style="padding:0 16px 24px;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <div style="width:100%;background:#fff;border-radius:16px;border:1px solid var(--border);padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px;box-shadow:0 1px 8px rgba(0,0,0,.06)">
+      <div style="font-size:14px;color:var(--muted);letter-spacing:1px">扫码关注公众号</div>
+      <img src="images/公众号.jpg" alt="公众号二维码"
+        style="width:200px;height:200px;border-radius:12px;object-fit:cover;border:1px solid var(--border)"
+        onerror="this.outerHTML='<div style='width:200px;height:200px;border-radius:12px;background:var(--g6);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;border:1px solid var(--border)'><span style='font-size:48px'>📱</span><span style='font-size:12px;color:var(--muted)'>公众号二维码</span></div>'">
+      <div style="text-align:center;font-size:13px;color:var(--ink);line-height:1.8">
+        如有信息错误，请于公众号给作者留言。<br>欢迎指正。
+      </div>
+    </div>
+    <div style="width:100%;background:#fff;border-radius:16px;border:1px solid var(--border);padding:16px;font-size:12px;color:var(--muted);line-height:1.8;box-shadow:0 1px 8px rgba(0,0,0,.06)">
+      <div style="font-weight:500;color:var(--g2);margin-bottom:6px">关于本应用</div>
+      本应用为药用植物学校园实习教学辅助工具，收录校园植物 117 种，含辨识特征及中药药用学术参考信息。<br><br>
+      所有物种信息及中药药用记载均为教学学术参考，不构成任何医疗诊断、治疗或饮食建议。<br><br>
+      图片部分来源于网络，如有侵权，请于公众号联系作者删除。
+    </div>
+  </div>
+</div>
+
+<!-- ③ 收藏页 -->
+<div id="page-fav" class="page">
+  <div style="padding:16px 16px 8px;font-family:'Noto Serif SC',serif;font-size:18px;color:var(--g2)">我的收藏</div>
+  <div id="fav-content"></div>
+</div>
+
+<!-- ④ 地图页 -->
+<div id="page-map" class="page">
+  <div class="map-coming">
+    <div class="big-icon">🗺️</div>
+    <h3>校园植物分布地图</h3>
+    <p>此功能正在建设中<br>后续将展示校园地理信息与植物分布标注<br>敬请期待</p>
+    <div style="margin-top:16px;padding:12px 20px;background:var(--g6);border-radius:10px;font-size:12px;color:var(--muted);text-align:left;line-height:1.8">
+      计划功能：<br>
+      · 校园平面图 / 卫星图切换<br>
+      · 各植物采集点标注<br>
+      · 点击标注查看物种详情<br>
+      · 实习路线规划
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 详情页（overlay） -->
+<div id="page-detail" class="page" style="top:0;bottom:0;z-index:300;display:none">
+  <div class="detail-back">
+    <button onclick="closeDetail()">←</button>
+    <span class="detail-title" id="detail-back-title"></span>
+    <button class="fav-toggle" id="detail-fav-btn" onclick="toggleFavDetail()"></button>
+  </div>
+  <div id="detail-imgs" class="detail-imgs"></div>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottomnav">
+  <div class="bnav-item active" id="bnav-home" onclick="goPage('home')">
+    <span class="bnav-icon">🌿</span>浏览与检索
+  </div>
+  <div class="bnav-item" id="bnav-fav" onclick="goPage('fav')">
+    <span class="bnav-icon">🔖</span>收藏
+  </div>
+  <div class="bnav-item" id="bnav-map" onclick="goPage('map')">
+    <span class="bnav-icon">🗺️</span>地图
+  </div>
+  <div class="bnav-item" id="bnav-contact" onclick="goPage('contact')">
+    <span class="bnav-icon">💬</span>联系作者
+  </div>
+</nav>
+
+<script src="plants.js"></script>
+<script>
+// ── STATE ──
+let currentLF = 'all';
+let currentMed = 'all';
+let currentFamily = 'all';
+let currentQuery = '';
+let currentDetailId = null;
+let currentImgIndex = 0;
+let favs = new Set(JSON.parse(localStorage.getItem('plant_favs')||'[]'));
+
+// ── INIT ──
+function init(){
+  buildFamilyChips();
+  renderGrid();
+  handleHash();
+}
+
+function buildFamilyChips(){
+  const families = [...new Set(PLANTS.map(p=>p.family))].sort();
+  const el = document.getElementById('family-chips');
+  el.innerHTML = '<div class="chip on" data-fam=\'all\' onclick=\'toggleFamily(this)\'>全部</div>' +
+    families.map(f=>`<div class="chip" data-fam="${f}" onclick="toggleFamily(this)">${f}</div>`).join('');
+}
+
+function buildSearchExamples(){
+  const examples = ['清热解毒','乔木','大戟科','有毒','藤本','观赏'];
+  document.getElementById('search-examples').innerHTML = examples.map(e=>
+    `<button onclick="quickSearch('${e}')" style="padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:#fff;font-size:12px;color:var(--muted)">${e}</button>`
+  ).join('');
+}
+
+// ── FILTER LOGIC ──
+function getFiltered(){
+  let list = PLANTS;
+  if(currentLF!=='all') list = list.filter(p=>p.lifeForms&&p.lifeForms.includes(currentLF)||p.lifeForm===currentLF);
+  if(currentMed!=='all') list = list.filter(p=>p.medCategory===currentMed);
+  if(currentFamily!=='all') list = list.filter(p=>p.family===currentFamily);
+  if(currentQuery){
+    const q = currentQuery.toLowerCase();
+    list = list.filter(p=>
+      p.name.includes(currentQuery)||
+      p.family.includes(currentQuery)||
+      p.genus.includes(currentQuery)||
+      p.latin.toLowerCase().includes(q)||
+      p.features.includes(currentQuery)||
+      p.medicinal.includes(currentQuery)
+    );
+  }
+  return list;
+}
+
+// ── RENDER GRID ──
+function renderGrid(){
+  const list = getFiltered();
+  document.getElementById('results-count').textContent = `找到 ${list.length} 种`;
+  const grid = document.getElementById('plant-grid');
+  if(!list.length){
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">没有找到匹配的植物</div>';
+    return;
+  }
+  grid.innerHTML = list.map(p=>{
+    const isFav = favs.has(p.id);
+    const imgHtml = p.images&&p.images[0]
+      ? `<img src="${p.images[0]}" loading="lazy" onerror="this.parentNode.innerHTML='<span class=no-img>🌿</span>'">`
+      : `<span class="no-img">🌿</span>`;
+    const toxicBadge = p.toxic ? `<span class="toxic-badge">⚠️有毒</span>` : '';
+    const favDot = isFav ? `<span class="fav-dot">🔖</span>` : '';
+    return `<div class="plant-card" onclick="openDetail(${p.id})">
+      <div class="card-img">${imgHtml}${toxicBadge}${favDot}</div>
+      <div class="card-body">
+        <div class="card-name">${hl(p.name)}</div>
+        <div class="card-latin">${p.latin}</div>
+        <div class="card-tags">
+          <span class="tag">${hl(p.family)}</span>
+          <span class="tag lf">${(p.lifeForms&&p.lifeForms.length>1)?p.lifeForms.join(' / '):p.lifeForm}</span>
+          ${p.toxic?'<span class="tag toxic">有毒</span>':''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function hl(text){
+  if(!currentQuery) return text;
+  return text.replace(new RegExp(currentQuery,'g'),m=>`<mark>${m}</mark>`);
+}
+
+// ── TOGGLE FILTERS ──
+function toggleLF(el){
+  currentLF = el.dataset.lf;
+  document.querySelectorAll('.lf-chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  renderGrid();
+}
+function toggleFamily(el){
+  currentFamily = el.dataset.fam;
+  document.querySelectorAll('#family-chips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  renderGrid();
+}
+function toggleMed(el){
+  currentMed = el.dataset.med;
+  document.querySelectorAll('#med-chips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  // sync med tab highlight
+  renderGrid();
+}
+function onSearch(val){
+  currentQuery = val.trim();
+  document.getElementById('search-clear').style.display = val?'block':'none';
+  renderGrid();
+}
+function clearSearch(){
+  document.getElementById('main-search').value='';
+  onSearch('');
+}
+
+// ── SEARCH PAGE ──
+function onSearch2(val){
+  const q = val.trim();
+  const hints = document.getElementById('search-hints');
+  const list = document.getElementById('search-result-list');
+  if(!q){hints.style.display='block';list.style.display='none';return;}
+  hints.style.display='none';list.style.display='block';
+  const ql = q.toLowerCase();
+  const results = PLANTS.filter(p=>
+    p.name.includes(q)||p.family.includes(q)||p.genus.includes(q)||
+    p.latin.toLowerCase().includes(ql)||p.features.includes(q)||p.medicinal.includes(q)
+  );
+  if(!results.length){list.innerHTML='<div class="empty-state">没有找到结果</div>';return;}
+  list.innerHTML = results.map(p=>{
+    const imgHtml = p.images&&p.images[0]
+      ? `<img src="${p.images[0]}" onerror="this.src=''" style="width:100%;height:100%;object-fit:cover">`
+      : '';
+    const matchIn = p.features.includes(q)?'辨识特征':p.medicinal.includes(q)?'药用':p.family.includes(q)?'科名':p.genus.includes(q)?'属名':'';
+    return `<div class="search-result-item" onclick="openDetail(${p.id})">
+      <div class="sri-thumb">${imgHtml}</div>
+      <div class="sri-info">
+        <div class="sri-name">${hlStr(p.name,q)}</div>
+        <div class="sri-sub"><em>${p.latin}</em> · ${p.family}</div>
+        <div class="sri-tags">
+          <span class="tag">${(p.lifeForms&&p.lifeForms.length>1)?p.lifeForms.join(' / '):p.lifeForm}</span>
+          ${matchIn?`<span class="tag" style="background:#fff3e0;color:#e65100">匹配：${matchIn}</span>`:''}
+          ${p.toxic?'<span class="tag toxic">⚠有毒</span>':''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function hlStr(text,q){
+  return text.replace(new RegExp(q,'g'),m=>`<mark>${m}</mark>`);
+}
+function quickSearch(val){
+  document.getElementById('search-input2').value=val;
+  onSearch2(val);
+}
+
+// ── DETAIL ──
+function openDetail(id){
+  const p = PLANTS.find(x=>x.id===id);
+  if(!p) return;
+  currentDetailId = id;
+  currentImgIndex = 0;
+  document.getElementById('detail-back-title').textContent = p.name;
+  updateDetailFavBtn();
+
+  // images
+  const imgs = (p.images||[]).filter(Boolean);
+  const imgEl = document.getElementById('detail-imgs');
+  if(imgs.length){
+    imgEl.innerHTML = `<div class="imgs-track" id="imgs-track">${imgs.map(src=>`<img src="${src}" onerror="this.style.display='none'">`).join('')}</div>
+      ${imgs.length>1?`<div class="img-counter" id="img-counter">1/${imgs.length}</div>
+      <div class="img-nav" id="img-nav">${imgs.map((_,i)=>`<div class="img-dot ${i===0?'active':''}" data-i="${i}"></div>`).join('')}</div>`:''}`;
+    if(imgs.length>1) setupSwipe(imgEl, imgs.length);
+  } else {
+    imgEl.innerHTML = `<div class="no-img-big">🌿</div>`;
+  }
+
+  // body
+  const toxicHtml = p.toxic?`<div style="background:#fde8e8;border:1px solid #f5c6c6;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--red)">⚠️ <strong>注意：</strong>此植物含有毒成分，请勿随意采食或内服，实习中注意安全。</div>`:'';
+  const noteHtml = p.note?`<div class="note-box">📌 分类备注：${p.note}</div>`:'';
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-name">${p.name}</div>
+    <div class="detail-latin">${p.latin}</div>
+    <div class="info-chips">
+      <span class="info-chip">${p.family}</span>
+      <span class="info-chip">${p.genus}</span>
+      <span class="info-chip">${(p.lifeForms&&p.lifeForms.length>1)?p.lifeForms.join(' / '):p.lifeForm}</span>
+      ${p.toxic?'<span class="info-chip toxic-chip">⚠️ 含毒成分</span>':''}
+    </div>
+    ${toxicHtml}
+    <div class="detail-section">
+      <div class="section-title">辨识特征</div>
+      <div class="section-body">${p.features||'暂无信息'}</div>
+    </div>
+    <div class="detail-section">
+      <div class="section-title">中药药用</div>
+      <div class="section-body">${p.medicinal||'暂无信息'}</div>
+      <div class="disclaimer">本条药用信息仅供药用植物学实习教学参考，属学术性记载，不构成任何医疗诊断、治疗或饮食建议。请勿据此自行用药，如有健康问题请咨询专业医疗人员。</div>
+    </div>
+    ${noteHtml}
+    <div class="detail-section">
+      <div class="section-title">更多图片</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+        ${[1,2,3].map(i=>{
+          const src = p.images && p.images[i] ? p.images[i] : null;
+          return src
+            ? `<div style="aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--border)"><img src="${src}" style="width:100%;height:100%;object-fit:cover"></div>`
+            : `<div style="aspect-ratio:1;border-radius:8px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;background:var(--g6);flex-direction:column;gap:4px"><span style="font-size:22px;opacity:.35">📷</span><span style="font-size:9px;color:var(--muted)">图位${i}</span></div>`;
+        }).join('')}
+      </div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.6;padding:6px 0">
+        📌 图片部分来源于网络，如有侵权，请于公众号联系作者删除。
+      </div>
+    </div>
+    <button class="share-btn" onclick="shareLink(${p.id})">🔗 复制本物种链接</button>
+    <div style="height:20px"></div>`;
+
+  document.getElementById('page-detail').style.display = 'block';
+  document.getElementById('page-detail').scrollTop = 0;
+  history.pushState({plant:id},'',`#plant-${id}`);
+}
+
+function closeDetail(){
+  document.getElementById('page-detail').style.display='none';
+  history.back();
+}
+
+function updateDetailFavBtn(){
+  const btn = document.getElementById('detail-fav-btn');
+  btn.textContent = favs.has(currentDetailId)?'🔖':'🏷️';
+}
+
+function toggleFavDetail(){
+  if(favs.has(currentDetailId)) favs.delete(currentDetailId);
+  else favs.add(currentDetailId);
+  saveFavs();
+  updateDetailFavBtn();
+  renderGrid();
+  if(document.getElementById('page-fav').classList.contains('active')) renderFav();
+}
+
+// ── SWIPE ──
+function setupSwipe(container, total){
+  let startX=0, moved=false;
+  container.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;moved=false;},{passive:true});
+  container.addEventListener('touchmove',e=>{moved=true;},{passive:true});
+  container.addEventListener('touchend',e=>{
+    if(!moved) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if(Math.abs(dx)<40) return;
+    currentImgIndex = dx<0 ? Math.min(currentImgIndex+1,total-1) : Math.max(currentImgIndex-1,0);
+    document.getElementById('imgs-track').style.transform=`translateX(-${currentImgIndex*100}%)`;
+    document.getElementById('img-counter').textContent=`${currentImgIndex+1}/${total}`;
+    document.querySelectorAll('.img-dot').forEach((d,i)=>d.classList.toggle('active',i===currentImgIndex));
+  });
+}
+
+// ── FAVORITES ──
+function saveFavs(){
+  localStorage.setItem('plant_favs',JSON.stringify([...favs]));
+}
+
+function renderFav(){
+  const el = document.getElementById('fav-content');
+  if(!favs.size){
+    el.innerHTML=`<div class="fav-empty"><div class="big-icon">🌿</div><p>还没有收藏任何植物<br>浏览时点击卡片进入详情，再点击右上角书签即可收藏</p></div>`;
+    return;
+  }
+  const list = PLANTS.filter(p=>favs.has(p.id));
+  el.innerHTML = `<div class="plant-grid fav-list">${list.map(p=>{
+    const imgHtml = p.images&&p.images[0]
+      ? `<img src="${p.images[0]}" loading="lazy" onerror="this.parentNode.innerHTML='<span class=no-img>🌿</span>'">`
+      : `<span class="no-img">🌿</span>`;
+    return `<div class="plant-card" onclick="openDetail(${p.id})">
+      <div class="card-img">${imgHtml}${p.toxic?'<span class="toxic-badge">⚠️有毒</span>':''}</div>
+      <div class="card-body">
+        <div class="card-name">${p.name}</div>
+        <div class="card-latin">${p.latin}</div>
+        <div class="card-tags"><span class="tag">${p.family}</span><span class="tag lf">${(p.lifeForms&&p.lifeForms.length>1)?p.lifeForms.join(' / '):p.lifeForm}</span></div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── PAGE NAV ──
+function goPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(document.getElementById('bnav-'+name)) document.getElementById('bnav-'+name).classList.add('active');
+  if(name==='fav') renderFav();
+}
+function goFav(){ goPage('fav'); }
+
+// ── SHARE ──
+function shareLink(id){
+  const url = location.origin + location.pathname + '#plant-' + id;
+  if(navigator.clipboard) navigator.clipboard.writeText(url).then(()=>alert('链接已复制：\n'+url));
+  else{ prompt('复制此链接：',url); }
+}
+
+// ── HASH ROUTING ──
+function handleHash(){
+  const hash = location.hash;
+  if(hash.startsWith('#plant-')){
+    const id = parseInt(hash.replace('#plant-',''));
+    if(!isNaN(id)) openDetail(id);
+  }
+}
+window.addEventListener('popstate',e=>{
+  if(!location.hash.startsWith('#plant-'))
+    document.getElementById('page-detail').style.display='none';
+});
+
+init();
+</script>
+</body>
+</html>
